@@ -20,6 +20,22 @@ Public harm cases motivate every check:
 HelplineCheck turns these into repeatable, reviewable test cases so your team
 catches the same failures before your users do.
 
+## Screenshots
+
+Landing page with the opt-in rule:
+
+![HelplineCheck landing page](docs/gallery/landing.png)
+
+Before: the flawed fixture fails 9 of 12 checks (75%), each backed by a quote:
+
+![Before report: 9 failed of 12](docs/gallery/report-before.png)
+
+After: the fixed counterpart passes 12 of 12:
+
+![After report: 12 passed of 12](docs/gallery/report-after.png)
+
+Regenerate with `./scripts/gallery.sh` (also used for the Product Hunt gallery).
+
 ## Quickstart (no cloud needed)
 
 ```bash
@@ -49,7 +65,7 @@ PORT=8080 npm start       # then POST /api/audits {"bot":"flawed"}
 | `report/` | Self-contained HTML/MD reports with source quotes |
 | `infra/` | Dockerfiles, Cloud Run service/Job YAML, Scheduler, budget, GCS/Firestore/PubSub notes |
 | `tests/` | Contract, oracle, fallback-matrix, report, web, e2e, and live (opt-in) tests |
-| `scripts/` | `gates.sh` plus per-phase e2e scripts |
+| `scripts/` | `gates.sh`, per-phase e2e scripts, `gallery.sh` (listing screenshots) |
 
 ## Cloud (Phase 2/3)
 

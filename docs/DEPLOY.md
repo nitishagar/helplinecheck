@@ -7,13 +7,19 @@ Every stage ends with a check. Placeholders: `PROJECT_ID`, `BILLING_ACCOUNT`.
 export GCP_PROJECT=PROJECT_ID REGION=us-central1 BILLING_ACCOUNT=XXXXXX-XXXXXX-XXXXXX
 ```
 
-## 0. Prereqs (human, once)
+## 0. Prereqs (human, once) — $0 out of pocket via Free Trial
 
 - `gcloud` CLI installed, `gcloud auth login`, `gcloud config set project "$GCP_PROJECT"`.
-- Project linked to a billing account. L4 GPU quota: first GPU deploy needs
-  ~3000 milliGPU; if the judge deploy fails on quota, request it in the
-  console (IAM & Admin → Quotas) and continue — the Gemini fallback keeps the
-  demo working meanwhile.
+- No paid account needed: sign up for the [Free Trial](https://console.cloud.google.com/freetrial)
+  ($300 Welcome credit, 90 days, new paying customers only; card required for
+  verification, [you are not billed during the trial](https://docs.cloud.google.com/free/docs/free-cloud-features)).
+  Our whole footprint (web + job + one audit ≈ $0.35) fits many times over.
+- GPU caveat: trial accounts [cannot add GPUs or request quota increases](https://docs.cloud.google.com/free/docs/free-cloud-features).
+  Two paths: (a) stay on trial — deploy web + job on CPU credit and run the
+  cloud judge via the Gemini fallback (still fully "on Cloud Run", eligible);
+  or (b) upgrade to a paid billing account (keeps remaining $300 credit, unlocks
+  GPUs, billed only beyond credit) to deploy the L4 judge. Either way the $5
+  budget in §2 watches spend, and deleting the project after launch ends all cost.
 
 ## 1. APIs + service account
 
