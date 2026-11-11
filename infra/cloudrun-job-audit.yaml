@@ -1,0 +1,37 @@
+# Parallel audit Job (plan I3): runs the corpus off the serving path.
+# Applied with: gcloud run jobs replace infra/cloudrun-job-audit.yaml --region us-central1
+# Started with: gcloud run jobs execute helplinecheck-audit --region us-central1 --wait
+apiVersion: run.googleapis.com/v1
+kind: Job
+metadata:
+  name: helplinecheck-audit
+spec:
+  template:
+    spec:
+      parallelism: 8
+      taskCount: 1
+      timeout: 1800s
+      template:
+        spec:
+          serviceAccountName: helplinecheck-run@PROJECT_ID.iam.gserviceaccount.com
+          containers:
+            - image: REGION-docker.pkg.dev/PROJECT_ID/helplinecheck/worker:latest
+              resources:
+                limits:
+                  cpu: "4"
+                  memory: 4Gi
+              env:
+                - name: AUDIT_BOT
+                  value: flawed
+                - name: AUDIT_CONCURRENCY
+                  value: "8"
+                - name: JUDGE_MODE
+                  value: prefer-gemma
+                - name: JUDGE_URL
+                  value: https://helplinecheck-judge-HASH-uc.a.run.app
+                - name: GCP_PROJECT
+                  value: PROJECT_ID
+                - name: GCP_LOCATION
+                  value: us-central1
+                - name: REPORT_BUCKET
+                  value: PROJECT_ID-helplinecheck-reports

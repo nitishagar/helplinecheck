@@ -1,0 +1,37 @@
+# Scale-to-zero web service (plan I8). Applied with:
+# gcloud run services replace infra/cloudrun-service-web.yaml --region us-central1
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: helplinecheck-web
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/cpu-throttling: "true"
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: helplinecheck-run@PROJECT_ID.iam.gserviceaccount.com
+      containers:
+        - image: REGION-docker.pkg.dev/PROJECT_ID/helplinecheck/web:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "2"
+              memory: 1Gi
+          env:
+            - name: JUDGE_URL
+              value: https://helplinecheck-judge-HASH-uc.a.run.app
+            - name: JUDGE_MODE
+              value: prefer-gemma
+            - name: GCP_PROJECT
+              value: PROJECT_ID
+  traffic:
+    - percent: 100
+      latestRevision: true

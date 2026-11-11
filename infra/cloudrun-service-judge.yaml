@@ -1,0 +1,48 @@
+# Gemma judge on L4 GPUs, scales to zero (plan I4 + Q2 sizing).
+# GPU config per Cloud Run docs: 1x L4 (24GB), min 4 vCPU + 16GiB, instance-based billing.
+# NOTE: GPU services idle ~10 min post-request (~$0.17/wake), so batch audits run
+# as Jobs (cloudrun-job-audit.yaml) and only verdict calls hit this service.
+# Applied with:
+# gcloud run services replace infra/cloudrun-service-judge.yaml --region us-central1
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: helplinecheck-judge
+  annotations:
+    run.googleapis.com/ingress: internal
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "3"
+        run.googleapis.com/gpu-type: nvidia-l4
+        run.googleapis.com/cpu-throttling: "false"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containerConcurrency: 1
+      timeoutSeconds: 600
+      serviceAccountName: helplinecheck-run@PROJECT_ID.iam.gserviceaccount.com
+      nodeSelector:
+        run.googleapis.com/accelerator: nvidia-l4
+      containers:
+        - image: REGION-docker.pkg.dev/PROJECT_ID/helplinecheck/judge:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "4"
+              memory: 16Gi
+              nvidia.com/gpu: "1"
+          env:
+            - name: JUDGE_MODEL
+              value: gemma3:4b
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 30
+  traffic:
+    - percent: 100
+      latestRevision: true

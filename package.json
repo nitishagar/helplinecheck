@@ -1,0 +1,38 @@
+{
+  "name": "helplinecheck",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Nitish Agarwal <1592163+nitishagar@users.noreply.github.com>",
+  "description": "Open-source safety-audit harness for helpline-style bots: adversarial test cases, parallel Cloud Run Job audits, Gemma-on-L4 judge with Gemini fallback, shareable reports.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "tsc",
+    "test": "vitest run",
+    "test-one": "vitest run",
+    "test:live": "HELPLINECHECK_LIVE=1 vitest run tests/live.test.ts",
+    "smoke": "node scripts/smoke.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run build && npm test && npm run smoke && echo 'VERIFY OK stage=all'",
+    "verify:phase1": "vitest run tests/schema-contract.test.ts tests/taxonomy-generator.test.ts tests/flawed-bot.test.ts tests/e2e-local.test.ts",
+    "verify:phase2": "vitest run tests/fallback-matrix.test.ts tests/flawed-bot.test.ts",
+    "verify:phase3": "vitest run tests/report.test.ts tests/web.test.ts tests/e2e-local.test.ts",
+    "gates": "./scripts/gates.sh all",
+    "start": "node dist/web/main.js"
+  },
+  "dependencies": {
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.39.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^4.1.0"
+  }
+}

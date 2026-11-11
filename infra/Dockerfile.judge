@@ -1,0 +1,9 @@
+# Gemma judge on Cloud Run GPUs (official Ollama + Gemma tutorial shape).
+# Pre-pulls Gemma 3 4B (E4B) — the Q2 sizing answer for the L4 24GB config.
+FROM ollama/ollama:latest
+ENV OLLAMA_HOST=0.0.0.0:8080 \
+    OLLAMA_NUM_PARALLEL=1 \
+    JUDGE_MODEL=gemma3:4b
+EXPOSE 8080
+COPY infra/ollama-entrypoint.sh /usr/local/bin/ollama-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/ollama-entrypoint.sh"]

@@ -1,0 +1,12 @@
+# Weekly scheduled audit (Cloud Scheduler -> Pub/Sub -> Job launcher).
+# First 3 jobs per billing account are free, then $0.10/job/31d.
+# Created with:
+# gcloud scheduler jobs create pubsub helplinecheck-weekly \
+#   --project PROJECT_ID --location us-central1 --schedule "0 9 * * MON" \
+#   --topic helplinecheck-audit-requests --message-body '{"bot":"flawed"}' \
+#   --time-zone America/New_York
+name: helplinecheck-weekly
+schedule: "0 9 * * MON"
+timeZone: America/New_York
+topic: helplinecheck-audit-requests
+messageBody: '{"bot":"flawed"}'
