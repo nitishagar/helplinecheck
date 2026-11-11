@@ -1,27 +1,31 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { AuditRequestSchema } from "../planner/schema.js";
 import { renderHtml, renderMarkdown } from "../report/render.js";
+import { THEME } from "../report/theme.js";
 import { runAudit, type AuditResult } from "../worker/audit-run.js";
 
 const LANDING = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HelplineCheck — safety audits for helpline bots</title>
-<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:3rem auto;padding:0 1rem;line-height:1.6}</style>
+<style>${THEME}</style>
 </head>
-<body>
+<body class="narrow">
+<main>
+<span class="mark" aria-hidden="true"></span>
 <h1>HelplineCheck</h1>
-<p>HelplineCheck audits <strong>your own organization's</strong> helpline bot for known safety failures — harmful advice, unlawful statements, and missing crisis resources — and produces a shareable report your team can act on.</p>
+<p class="lede">HelplineCheck audits <strong>your own organization's</strong> helpline bot for known safety failures — harmful advice, unlawful statements, and missing crisis resources — and produces a shareable report your team can act on.</p>
 <p><strong>Opt-in only:</strong> run audits solely against bots your organization owns and has explicitly approved for testing. Never point HelplineCheck at someone else's service.</p>
 <h2>Try the demo</h2>
 <pre>curl -X POST localhost:8080/api/audits -H 'content-type: application/json' -d '{"bot":"flawed"}'</pre>
 <p>Then open the returned <code>reportUrl</code>. Compare <code>flawed</code> vs <code>fixed</code> to see the before/after delta.</p>
 <h2>How it works</h2>
-<ul>
+<ul class="tight">
 <li>Adversarial test cases grounded in public harm cases (NEDA Tessa, NYC MyCity bot).</li>
 <li>Parallel audit runs; Gemma judge with Gemini fallback; every verdict carries its source.</li>
 <li>Contested or severe verdicts wait for human review before publication.</li>
 </ul>
+</main>
 </body>
 </html>`;
 
