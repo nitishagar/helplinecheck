@@ -1,0 +1,39 @@
+%% HelplineCheck cloud architecture — Mermaid source for docs/ARCHITECTURE.md.
+%% Render: paste into https://mermaid.live or any Mermaid renderer.
+flowchart TB
+  subgraph schedule["Cloud Scheduler (helplinecheck-weekly)"]
+    SCHED["Mon 9am ET<br/>first 3 jobs free"]
+  end
+  subgraph web["Cloud Run service: helplinecheck-web"]
+    WEB["audit API + report server<br/>minScale 0, request billing<br/>POST /api/audits, GET /reports/:id"]
+  end
+  subgraph job["Cloud Run Job: helplinecheck-audit"]
+    AUDIT["parallel audit runner<br/>parallelism 8, 15-30 min<br/>off the serving path"]
+  end
+  subgraph judge["Cloud Run service: helplinecheck-judge"]
+    GEMMA["Gemma 3 4B via Ollama<br/>1x L4, 4 vCPU, 16 GiB<br/>minScale 0, verdict calls only"]
+  end
+  GEMINI["Gemini fallback<br/>Developer API key<br/>or Vertex AI path"]
+  PLANNER["planner: taxonomy + zod schemas<br/>deterministic corpus (12 seeds)<br/>mirrors ADK output_schema"]
+  BOT["target bot<br/>org's own, opt-in only"]
+  subgraph stores["stores"]
+    FS[("Firestore<br/>auditRuns + records<br/>reviewQueue")]
+    GCS[("GCS<br/>report.html / .md<br/>summary.json")]
+  end
+  BUDGET["billing budget $5 cap<br/>50/90/100% + forecast<br/>-> budget-alerts topic"]
+
+  SCHED -->|"Pub/Sub<br/>audit-requests"| AUDIT
+  BROWSER["browser"] -->|"POST /api/audits"| WEB
+  WEB -->|"inline (demo)"| AUDIT
+  WEB -->|"cloud path: publish"| AUDIT
+  WEB -->|"execute job"| AUDIT
+  PLANNER -->|"test cases"| AUDIT
+  AUDIT -->|"prompts"| BOT
+  BOT -->|"responses"| AUDIT
+  AUDIT -->|"verdict calls"| GEMMA
+  GEMMA -->|"fallback"| GEMINI
+  AUDIT -->|"summaries + records<br/>contested/high/critical"| FS
+  AUDIT -->|"immutable reports"| GCS
+  WEB -->|"reads"| FS
+  WEB -->|"serves"| GCS
+  BUDGET -.->|"alerts"| AUDIT
